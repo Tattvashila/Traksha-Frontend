@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { setCurrentUser } from "../state/authStore";
 import { TEXT } from "../shared/constants/textSystem";
 
-const BASE_URL = "https://traksha-backend.onrender.com";
+const BASE_URL = "https://traksha-backend-production.up.railway.app";
 
 export default function OtpScreen() {
   const navigate = useNavigate();

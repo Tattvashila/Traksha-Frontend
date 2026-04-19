@@ -5,7 +5,7 @@ import logo from "../assets/traksha-logo.png";
 import { TEXT } from "../shared/constants/textSystem";
 import { getAdaptiveTheme } from "../core/ui/adaptiveTheme";
 
-const BASE_URL = "https://traksha-backend.onrender.com";
+const BASE_URL = "https://traksha-backend-production.up.railway.app";
 
 export default function LoginScreen() {
   const navigate = useNavigate();

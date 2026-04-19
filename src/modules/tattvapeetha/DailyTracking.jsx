@@ -3,7 +3,7 @@ import { TEXT } from "../../shared/constants/textSystem";
 import { getUserId } from "../../state/authStore";
 import { addActivity } from "./TrackerStore"; // 🔥 LOCAL + BACKEND SYNC
 
-const BASE_URL = "https://traksha-backend.onrender.com";
+const BASE_URL = "https://traksha-backend-production.up.railway.app";
 
 export default function DailyTracking() {
   const [data, setData] = useState({

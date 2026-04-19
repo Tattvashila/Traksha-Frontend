@@ -3,7 +3,7 @@ import { processStudentActivity } from "../../core/decision/connectEngine";
 import { getUserId } from "../../state/authStore";
 import { getUserStats } from "./TrackerStore"; // ✅ KEEP CAPITAL T (IMPORTANT)
 
-const BASE_URL = "https://traksha-backend.onrender.com";
+const BASE_URL = "https://traksha-backend-production.up.railway.app";
 
 export default function ParentDashboard() {
   const [report, setReport] = useState(null);

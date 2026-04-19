@@ -2,7 +2,7 @@
 // 🧠 TRAKSHA TRACKER STORE (REAL BACKEND SYNC)
 // =========================
 
-const BASE_URL = "https://traksha-backend.onrender.com";
+const BASE_URL = "https://traksha-backend-production.up.railway.app";
 
 const tracker = {};
 
