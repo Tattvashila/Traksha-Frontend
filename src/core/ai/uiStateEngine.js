@@ -2,7 +2,7 @@
 // 🧠 TRAKSHA GOD MODE UI ENGINE (SAFE)
 // =========================
 
-import { getUserState, getUserScore } from "../../modules/tattvapeetha/TrackerStore";
+import { getUserState, getUserScore } from "../../modules/tattvapeetha/TeacherDashboard";
 
 // =========================
 // 🎨 UI STATE GENERATOR

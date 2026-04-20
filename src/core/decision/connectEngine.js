@@ -2,7 +2,7 @@
 // 🧠 TRAKSHA CONNECT ENGINE V2 (INTELLIGENCE)
 // =========================
 
-import { getUserScore, getUserState } from "../../modules/tattvapeetha/TrackerStore";
+import { getUserScore, getUserState } from "../../modules/tattvapeetha/TeacherDashboard";
 
 // 🔥 MAIN FUNCTION
 export function processStudentActivity(userId, mode, stats) {

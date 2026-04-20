@@ -1,15 +1,26 @@
 import React, { useState } from "react";
 import { processStudentActivity } from "../../core/decision/connectEngine";
 import { getUserId } from "../../state/authStore";
-import { getUserStats } from "./TrackerStore"; // ✅ KEEP CAPITAL T (IMPORTANT)
+import { getUserStats } from "./TrackerStore";
 
-const BASE_URL = "https://traksha-backend-production.up.railway.app";
+// 🔥 NEW SYSTEMS
+import { useTrakshaAI } from "../../core/ai/trakshaAIEngine";
+import useWaterTouch from "../../shared/hooks/useWaterTouch";
+import { getScreenConfig } from "../../core/ui/screenAdaptiveEngine";
+import AIPresence from "../../shared/components/AIPresence";
+
+const BASE_URL = "https://traksha-backend.onrender.com";
 
 export default function ParentDashboard() {
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const userId = getUserId();
+
+  // 🔥 NEW HOOKS
+  const ai = useTrakshaAI(userId);
+  const screen = getScreenConfig();
+  useWaterTouch();
 
   const generateReport = async () => {
     if (!userId) {
@@ -20,11 +31,9 @@ export default function ParentDashboard() {
     setLoading(true);
 
     try {
-      // 🔥 1. FETCH FROM BACKEND
       const res = await fetch(`${BASE_URL}/api/stats/${userId}`);
       const backendStats = await res.json();
 
-      // 🔥 2. LOCAL FALLBACK (SAFE)
       const localStats = getUserStats(userId);
 
       const stats = {
@@ -33,7 +42,6 @@ export default function ParentDashboard() {
         distraction: backendStats.distraction ?? localStats.distraction ?? 0
       };
 
-      // 🔥 3. PROCESS INTELLIGENCE
       const result = processStudentActivity(userId, "weekly", stats);
 
       setReport(result?.report || null);
@@ -47,96 +55,118 @@ export default function ParentDashboard() {
   };
 
   return (
-    <div style={styles.container}>
+    <>
+      <div
+        style={{
+          ...styles.container(screen),
+          background:
+            ai?.uiMode === "DISTRACTED"
+              ? "linear-gradient(135deg, #FFE5E5, #FFF3E0)"
+              : ai?.uiMode === "HIGH"
+              ? "linear-gradient(135deg, #FFF8E1, #FFE082)"
+              : "linear-gradient(135deg, #FFFDF7, #FFF3E0)"
+        }}
+      >
 
-      <h2>📊 Abhibhavak Dashboard</h2>
-      <p style={styles.sub}>Weekly Intelligence Report</p>
+        <h2 style={styles.title(screen)}>📊 Abhibhavak Dashboard</h2>
+        <p style={styles.sub(screen)}>Weekly Intelligence Report</p>
 
-      <button style={styles.btn} onClick={generateReport}>
-        {loading ? "Generating..." : "Generate Weekly Report"}
-      </button>
+        <button style={styles.btn} onClick={generateReport}>
+          {loading ? "Generating..." : "Generate Weekly Report"}
+        </button>
 
-      {/* 🔥 EMPTY STATE */}
-      {!report && !loading && (
-        <p style={styles.empty}>
-          No report generated yet
-        </p>
-      )}
+        {/* EMPTY */}
+        {!report && !loading && (
+          <p style={styles.empty}>No report generated yet</p>
+        )}
 
-      {/* 🔄 LOADING */}
-      {loading && (
-        <p style={styles.loading}>
-          Processing student intelligence...
-        </p>
-      )}
+        {/* LOADING */}
+        {loading && (
+          <p style={styles.loading}>
+            Processing student intelligence...
+          </p>
+        )}
 
-      {/* ✅ REPORT */}
-      {report && (
-        <div style={styles.card}>
+        {/* REPORT */}
+        {report && (
+          <div style={styles.card(ai)}>
 
-          <h3>📌 Overview</h3>
-          <p>Score: {report.score}</p>
-          <p>Status: {report.status}</p>
-          <p>Pattern: {report.pattern}</p>
+            <h3>📌 Overview</h3>
+            <p>Score: {report.score}</p>
+            <p>Status: {report.status}</p>
+            <p>Pattern: {report.pattern}</p>
 
-          <h3 style={{ marginTop: "15px" }}>🧠 Guidance</h3>
-          <ul>
-            {report.advice?.map((a, i) => (
-              <li key={i}>{a}</li>
-            ))}
-          </ul>
+            <h3 style={{ marginTop: "15px" }}>🧠 Guidance</h3>
+            <ul>
+              {report.advice?.map((a, i) => (
+                <li key={i}>{a}</li>
+              ))}
+            </ul>
 
-        </div>
-      )}
+          </div>
+        )}
 
-    </div>
+      </div>
+
+      {/* 🔮 AI PRESENCE */}
+      <AIPresence ai={ai} />
+    </>
   );
 }
 
-// 🎨 STYLES
+// 🎨 ADAPTIVE STYLES
 const styles = {
-  container: {
+  container: (screen) => ({
     minHeight: "100vh",
     width: "100%",
-    maxWidth: "420px",
+    maxWidth: screen.container.maxWidth,
     margin: "0 auto",
-    padding: "20px",
-    background: "#0F0F0F",
-    color: "#fff",
-    fontFamily: "-apple-system, sans-serif"
-  },
+    padding: screen.container.padding
+  }),
 
-  sub: {
-    fontSize: "12px",
-    color: "#A1A1A6",
+  title: (screen) => ({
+    fontSize: screen.font.title,
+    color: "#5a3e1b"
+  }),
+
+  sub: (screen) => ({
+    fontSize: screen.font.text,
+    color: "#8c6b3c",
     marginBottom: "10px"
-  },
+  }),
 
   btn: {
     padding: "12px",
     marginTop: "10px",
-    borderRadius: "12px",
+    borderRadius: "14px",
     border: "none",
     background: "linear-gradient(135deg, #FFD166, #FFB300)",
     fontWeight: "bold",
-    cursor: "pointer"
+    cursor: "pointer",
+    boxShadow: "0 6px 18px rgba(255,183,0,0.4)"
   },
 
   empty: {
     marginTop: "15px",
-    color: "#888"
+    color: "#999"
   },
 
   loading: {
     marginTop: "15px",
-    color: "#FFD166"
+    color: "#FF9800"
   },
 
-  card: {
+  card: (ai) => ({
     marginTop: "20px",
     padding: "16px",
-    borderRadius: "14px",
-    background: "rgba(255,255,255,0.06)",
-    border: "1px solid rgba(255,255,255,0.08)"
-  }
+    borderRadius: "16px",
+    background:
+      ai?.uiMode === "HIGH"
+        ? "rgba(255,248,225,0.9)"
+        : ai?.uiMode === "DISTRACTED"
+        ? "rgba(255,235,235,0.9)"
+        : "rgba(255,255,255,0.8)",
+    border: "1px solid rgba(255,140,66,0.2)",
+    boxShadow: "0 10px 25px rgba(0,0,0,0.08)"
+  })
 };

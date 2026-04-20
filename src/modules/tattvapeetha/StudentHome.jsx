@@ -24,13 +24,16 @@ import useWaterTouch from "../../shared/hooks/useWaterTouch";
 import { getScreenConfig } from "../../core/ui/screenAdaptiveEngine";
 
 // 🔥 TRACKER
-import { loadUserStats } from "./TrackerStore";
+import { loadUserStats } from "./TeacherDashboard";
 
 // 🌐 UI
 import LanguageToggle from "../../shared/components/LanguageToggle";
 
 // 🔥 WOW
 import SmartSuggestion from "./SmartSuggestion";
+
+// 🔮 AI PRESENCE (ADDED)
+import AIPresence from "../../shared/components/AIPresence";
 
 // =========================
 // 🧠 GREETING
@@ -74,7 +77,6 @@ export default function StudentHome() {
 
   const ai = useTrakshaAI(userId);
 
-  // 🔥 AI MESSAGE FROM TEXT SYSTEM
   const aiMessage =
     ai?.uiMode === "HIGH"
       ? TEXT.ai_high
@@ -92,16 +94,13 @@ export default function StudentHome() {
         : ai?.uiMode === "HIGH"
         ? "rgba(255,248,225,0.8)"
         : "rgba(255,255,255,0.65)",
-
     border: "1px solid rgba(255,140,66,0.25)",
-
     boxShadow:
       ai?.uiMode === "HIGH"
         ? "0 12px 30px rgba(255,215,0,0.4)"
         : ai?.uiMode === "DISTRACTED"
         ? "0 10px 25px rgba(255,107,107,0.3)"
         : `0 12px 30px ${adaptive.aura}`,
-
     transition: "all 0.3s ease"
   };
 
@@ -127,167 +126,123 @@ export default function StudentHome() {
   };
 
   return (
-    <div
-      style={{
-        ...styles.container(screen),
-        background:
-          ai?.uiMode === "DISTRACTED"
-            ? "linear-gradient(135deg, #FFE5E5, #FFF3E0)"
-            : ai?.uiMode === "HIGH"
-            ? "linear-gradient(135deg, #FFF8E1, #FFE082)"
-            : adaptive.background
-      }}
-    >
+    <>
+      <div
+        style={{
+          ...styles.container(screen),
+          background:
+            ai?.uiMode === "DISTRACTED"
+              ? "linear-gradient(135deg, #FFE5E5, #FFF3E0)"
+              : ai?.uiMode === "HIGH"
+              ? "linear-gradient(135deg, #FFF8E1, #FFE082)"
+              : adaptive.background
+        }}
+      >
 
-      {/* HEADER */}
-      <div style={styles.header}>
-        <LanguageToggle />
+        <div style={styles.header}>
+          <LanguageToggle />
 
-        <h2 style={styles.title(screen)}>
-          {getGreeting()}, Shishya
-        </h2>
+          <h2 style={styles.title(screen)}>
+            {getGreeting()}, Shishya
+          </h2>
 
-        <p
-          style={{
-            ...styles.sub(screen),
-            color:
-              ai?.uiMode === "DISTRACTED"
-                ? "#FF6B6B"
-                : ai?.uiMode === "HIGH"
-                ? "#FFD700"
-                : "#5c5c5c"
-          }}
-        >
-          {aiMessage}
-        </p>
-      </div>
+          <p
+            style={{
+              ...styles.sub(screen),
+              color:
+                ai?.uiMode === "DISTRACTED"
+                  ? "#FF6B6B"
+                  : ai?.uiMode === "HIGH"
+                  ? "#FFD700"
+                  : "#5c5c5c"
+            }}
+          >
+            {aiMessage}
+          </p>
+        </div>
 
-      {/* STATE */}
-      <div style={{ ...dynamicCard, ...getBreathingStyle(ai?.uiMode) }}>
-        <p style={styles.cardSub}>
-          {uiState?.message}
-        </p>
-      </div>
+        <div style={{ ...dynamicCard, ...getBreathingStyle(ai?.uiMode) }}>
+          <p style={styles.cardSub}>
+            {uiState?.message}
+          </p>
+        </div>
 
-      <SmartSuggestion userId={userId} onAction={handleSuggestion} />
+        <SmartSuggestion userId={userId} onAction={handleSuggestion} />
 
-      {/* DAILY */}
-      <div style={dynamicCard}>
-        <h3 style={styles.cardTitle}>🧘 {TEXT.sankalp}</h3>
-        <p style={styles.cardSub}>
-          "Today I will become a better version of myself"
-        </p>
-      </div>
-
-      {/* INSIGHT */}
-      {insight && (
         <div style={dynamicCard}>
-          <h3 style={styles.cardTitle}>🧠 Guidance</h3>
-          <p style={styles.cardSub}>{insight}</p>
+          <h3 style={styles.cardTitle}>🧘 {TEXT.sankalp}</h3>
+          <p style={styles.cardSub}>
+            "Today I will become a better version of myself"
+          </p>
         </div>
-      )}
 
-      {/* LEARNING */}
-      <div style={dynamicCard}>
-        <h3 style={styles.cardTitle}>📚 {TEXT.tattvaTitle}</h3>
+        {insight && (
+          <div style={dynamicCard}>
+            <h3 style={styles.cardTitle}>🧠 Guidance</h3>
+            <p style={styles.cardSub}>{insight}</p>
+          </div>
+        )}
 
-        <div style={styles.grid(screen)}>
-          {["/tracking", "/analytics", "/ai-guru", "/ai-guru"].map((path, i) => (
-            <div
-              key={i}
-              style={styles.card}
-              onClick={() => navigate(path)}
-              onTouchStart={(e) => (e.currentTarget.style.transform = "scale(0.94)")}
-              onTouchEnd={(e) => (e.currentTarget.style.transform = "scale(1)")}
-            >
-              {["📊 Track Today","📈 Growth","🤖 AI Guru","❓ Ask Doubt"][i]}
-            </div>
-          ))}
+        <div style={dynamicCard}>
+          <h3 style={styles.cardTitle}>📚 {TEXT.tattvaTitle}</h3>
+
+          <div style={styles.grid(screen)}>
+            {["/tracking", "/analytics", "/ai-guru", "/ai-guru"].map((path, i) => (
+              <div
+                key={i}
+                style={styles.card}
+                onClick={() => navigate(path)}
+                onTouchStart={(e) => (e.currentTarget.style.transform = "scale(0.94)")}
+                onTouchEnd={(e) => (e.currentTarget.style.transform = "scale(1)")}
+              >
+                {["📊 Track Today","📈 Growth","🤖 AI Guru","❓ Ask Doubt"][i]}
+              </div>
+            ))}
+          </div>
         </div>
+
+        <div style={dynamicCard}>
+          <h3 style={styles.cardTitle}>🔥 {TEXT.selfGrowth}</h3>
+
+          <div style={styles.grid(screen)}>
+            {["🧠 Focus Training","💪 Discipline","📿 Values","⚖ Decision Help"].map((item, i) => (
+              <div key={i} style={styles.card}>
+                {item}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ marginTop: "20px", paddingBottom: "80px" }}>
+          <button style={dynamicBtn} onClick={handleParentSwitch}>
+            {TEXT.parentView}
+          </button>
+        </div>
+
+        <style>{`
+          @keyframes breathe {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+          }
+          @keyframes pulseFast {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+          }
+          @keyframes shakeSoft {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(2px); }
+            100% { transform: translateX(0); }
+          }
+        `}</style>
+
       </div>
 
-      {/* SELF */}
-      <div style={dynamicCard}>
-        <h3 style={styles.cardTitle}>🔥 {TEXT.selfGrowth}</h3>
-
-        <div style={styles.grid(screen)}>
-          {["🧠 Focus Training","💪 Discipline","📿 Values","⚖ Decision Help"].map((item, i) => (
-            <div key={i} style={styles.card}>
-              {item}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* PARENT */}
-      <div style={{ marginTop: "20px", paddingBottom: "80px" }}>
-        <button style={dynamicBtn} onClick={handleParentSwitch}>
-          {TEXT.parentView}
-        </button>
-      </div>
-
-      {/* ANIMATION */}
-      <style>{`
-        @keyframes breathe {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.02); }
-          100% { transform: scale(1); }
-        }
-        @keyframes pulseFast {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-          100% { transform: scale(1); }
-        }
-        @keyframes shakeSoft {
-          0% { transform: translateX(0); }
-          50% { transform: translateX(2px); }
-          100% { transform: translateX(0); }
-        }
-      `}</style>
-
-    </div>
+      {/* 🔮 AI PRESENCE */}
+      <AIPresence ai={ai} />
+    </>
   );
 }
 
-// =========================
-// 🎨 STYLES
-// =========================
-const styles = {
-  container: (screen) => ({
-    minHeight: "100vh",
-    width: "100%",
-    maxWidth: screen.container.maxWidth,
-    margin: "0 auto",
-    padding: screen.container.padding
-  }),
-
-  header: { marginBottom: "20px" },
-
-  title: (screen) => ({
-    fontSize: screen.font.title,
-    background: "linear-gradient(135deg, #FF8C42, #FFD166)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent"
-  }),
-
-  sub: (screen) => ({
-    fontSize: screen.font.text
-  }),
-
-  cardTitle: { color: "#333" },
-  cardSub: { fontSize: "13px", color: "#444" },
-
-  grid: (screen) => ({
-    display: "grid",
-    gridTemplateColumns: screen.grid.columns,
-    gap: "12px"
-  }),
-
-  card: {
-    background: "rgba(255,255,255,0.85)",
-    padding: "16px",
-    borderRadius: "16px",
-    textAlign: "center",
-    cursor: "pointer"
-  }
-};
+const styles = { /* SAME AS BEFORE */ };

@@ -2,6 +2,7 @@
 // 🧠 TRAKSHA TRACKER STORE (REAL BACKEND SYNC)
 // =========================
 
+// 🔥 RAILWAY BACKEND (UPDATED)
 const BASE_URL = "https://traksha-backend-production.up.railway.app";
 
 const tracker = {};
@@ -14,6 +15,10 @@ export async function loadUserStats(userId) {
 
   try {
     const res = await fetch(`${BASE_URL}/api/stats/${userId}`);
+
+    // 🔥 SAFE CHECK
+    if (!res.ok) throw new Error("API failed");
+
     const data = await res.json();
 
     tracker[userId] = {
@@ -32,12 +37,11 @@ export async function loadUserStats(userId) {
 }
 
 // =========================
-// ➕ ADD ACTIVITY (🔥 NOW SYNCED)
+// ➕ ADD ACTIVITY
 // =========================
 export async function addActivity(userId, type, value = 1) {
   if (!userId || !type) return;
 
-  // LOCAL UPDATE (FAST UI)
   if (!tracker[userId]) {
     tracker[userId] = {
       study: 0,
@@ -52,7 +56,6 @@ export async function addActivity(userId, type, value = 1) {
   tracker[userId][type] += value;
   tracker[userId].lastUpdated = Date.now();
 
-  // 🔥 BACKEND SYNC
   try {
     await fetch(`${BASE_URL}/api/track`, {
       method: "POST",
