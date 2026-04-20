@@ -1,5 +1,5 @@
 import React from "react";
-import { getUserState } from "./TeacherDashboard";
+import { getUserState } from "./TrackerStore";
 
 export default function SmartSuggestion({ userId, onAction }) {
   if (!userId) return null;

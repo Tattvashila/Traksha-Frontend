@@ -24,7 +24,7 @@ import useWaterTouch from "../../shared/hooks/useWaterTouch";
 import { getScreenConfig } from "../../core/ui/screenAdaptiveEngine";
 
 // 🔥 TRACKER
-import { loadUserStats } from "./TeacherDashboard";
+import { loadUserStats } from "./TrackerStore";
 
 // 🌐 UI
 import LanguageToggle from "../../shared/components/LanguageToggle";
