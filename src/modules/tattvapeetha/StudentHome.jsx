@@ -9,16 +9,38 @@ import { getUserId } from "../../state/authStore";
 import { generateInsight } from "../../core/ai/insightEngine";
 import { getUIState } from "../../core/ai/uiStateEngine";
 import { getAdaptiveTheme } from "../../core/ui/adaptiveTheme";
+import { useTrakshaAI } from "../../core/ai/trakshaAIEngine";
+
+// 🔥 TEXT SYSTEM
+import { TEXT } from "../../shared/constants/textSystem";
+
+// 🔥 AUTO TRACKING
+import useAutoTracking from "../../shared/hooks/useAutoTracking";
+
+// 💧 WATER TOUCH
+import useWaterTouch from "../../shared/hooks/useWaterTouch";
+
+// 🧠 SCREEN ENGINE
+import { getScreenConfig } from "../../core/ui/screenAdaptiveEngine";
 
 // 🔥 TRACKER
 import { loadUserStats } from "./TrackerStore";
 
 // 🌐 UI
 import LanguageToggle from "../../shared/components/LanguageToggle";
-import { roleThemes } from "../../shared/constants/roleThemes";
 
 // 🔥 WOW
 import SmartSuggestion from "./SmartSuggestion";
+
+// =========================
+// 🧠 GREETING
+// =========================
+const getGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good Morning";
+  if (hour < 18) return "Good Day";
+  return "Good Evening";
+};
 
 // =========================
 // 🧠 ANIMATION
@@ -33,14 +55,16 @@ export default function StudentHome() {
   const navigate = useNavigate();
   const userId = getUserId();
 
+  const screen = getScreenConfig();
+
   useEffect(() => {
-    if (userId) {
-      loadUserStats(userId);
-    }
+    if (userId) loadUserStats(userId);
   }, [userId]);
 
-  const insight = userId ? generateInsight(userId) : null;
+  useAutoTracking(userId);
+  useWaterTouch();
 
+  const insight = userId ? generateInsight(userId) : null;
   const uiState = getUIState(userId);
 
   const adaptive = getAdaptiveTheme({
@@ -48,18 +72,46 @@ export default function StudentHome() {
     role: "SHISHYA"
   });
 
+  const ai = useTrakshaAI(userId);
+
+  // 🔥 AI MESSAGE FROM TEXT SYSTEM
+  const aiMessage =
+    ai?.uiMode === "HIGH"
+      ? TEXT.ai_high
+      : ai?.uiMode === "DISTRACTED"
+      ? TEXT.ai_distracted
+      : ai?.uiMode === "INACTIVE"
+      ? TEXT.ai_inactive
+      : TEXT.ai_calm;
+
   const dynamicCard = {
     ...premiumCard,
-    background: "rgba(255,255,255,0.05)",
-    border: "1px solid rgba(255,140,66,0.2)",
-    boxShadow: `0 10px 30px ${adaptive.aura}`,
+    background:
+      ai?.uiMode === "DISTRACTED"
+        ? "rgba(255,240,240,0.7)"
+        : ai?.uiMode === "HIGH"
+        ? "rgba(255,248,225,0.8)"
+        : "rgba(255,255,255,0.65)",
+
+    border: "1px solid rgba(255,140,66,0.25)",
+
+    boxShadow:
+      ai?.uiMode === "HIGH"
+        ? "0 12px 30px rgba(255,215,0,0.4)"
+        : ai?.uiMode === "DISTRACTED"
+        ? "0 10px 25px rgba(255,107,107,0.3)"
+        : `0 12px 30px ${adaptive.aura}`,
+
     transition: "all 0.3s ease"
   };
 
   const dynamicBtn = {
     ...primaryBtn,
-    borderRadius: "14px",
-    boxShadow: adaptive.ctaShadow
+    borderRadius: "16px",
+    boxShadow:
+      ai?.uiMode === "HIGH"
+        ? "0 6px 20px rgba(255,215,0,0.5)"
+        : adaptive.ctaShadow
   };
 
   const handleSuggestion = (type) => {
@@ -75,63 +127,91 @@ export default function StudentHome() {
   };
 
   return (
-    <div style={{ ...styles.container, background: adaptive.background }}>
+    <div
+      style={{
+        ...styles.container(screen),
+        background:
+          ai?.uiMode === "DISTRACTED"
+            ? "linear-gradient(135deg, #FFE5E5, #FFF3E0)"
+            : ai?.uiMode === "HIGH"
+            ? "linear-gradient(135deg, #FFF8E1, #FFE082)"
+            : adaptive.background
+      }}
+    >
 
+      {/* HEADER */}
       <div style={styles.header}>
         <LanguageToggle />
-        <h2 style={styles.title}>Shishya Path</h2>
-        <p style={styles.sub}>Your growth journey begins here</p>
+
+        <h2 style={styles.title(screen)}>
+          {getGreeting()}, Shishya
+        </h2>
+
+        <p
+          style={{
+            ...styles.sub(screen),
+            color:
+              ai?.uiMode === "DISTRACTED"
+                ? "#FF6B6B"
+                : ai?.uiMode === "HIGH"
+                ? "#FFD700"
+                : "#5c5c5c"
+          }}
+        >
+          {aiMessage}
+        </p>
       </div>
 
-      {/* SAFE FIX */}
-      <div style={{ ...dynamicCard, ...getBreathingStyle(uiState?.mode) }}>
-        <p style={{ ...styles.cardSub, color: adaptive.accent || "#FFD166" }}>
+      {/* STATE */}
+      <div style={{ ...dynamicCard, ...getBreathingStyle(ai?.uiMode) }}>
+        <p style={styles.cardSub}>
           {uiState?.message}
         </p>
       </div>
 
       <SmartSuggestion userId={userId} onAction={handleSuggestion} />
 
+      {/* DAILY */}
       <div style={dynamicCard}>
-        <h3 style={styles.cardTitle}>🧘 Daily Sankalp</h3>
+        <h3 style={styles.cardTitle}>🧘 {TEXT.sankalp}</h3>
         <p style={styles.cardSub}>
-          "Aaj main apne aap ko behtar banaunga"
+          "Today I will become a better version of myself"
         </p>
       </div>
 
+      {/* INSIGHT */}
       {insight && (
         <div style={dynamicCard}>
-          <h3 style={styles.cardTitle}>🧠 Aaj ka Margdarshan</h3>
+          <h3 style={styles.cardTitle}>🧠 Guidance</h3>
           <p style={styles.cardSub}>{insight}</p>
         </div>
       )}
 
+      {/* LEARNING */}
       <div style={dynamicCard}>
-        <h3 style={styles.cardTitle}>📚 Learning Zone</h3>
+        <h3 style={styles.cardTitle}>📚 {TEXT.tattvaTitle}</h3>
 
-        <div style={styles.grid}>
+        <div style={styles.grid(screen)}>
           {["/tracking", "/analytics", "/ai-guru", "/ai-guru"].map((path, i) => (
             <div
               key={i}
               style={styles.card}
               onClick={() => navigate(path)}
-              onTouchStart={(e) => (e.currentTarget.style.transform = "scale(0.96)")}
+              onTouchStart={(e) => (e.currentTarget.style.transform = "scale(0.94)")}
               onTouchEnd={(e) => (e.currentTarget.style.transform = "scale(1)")}
             >
-              {i === 0 && "📊 Track Today"}
-              {i === 1 && "📈 Growth"}
-              {i === 2 && "🤖 AI Guru"}
-              {i === 3 && "❓ Ask Doubt"}
+              {["📊 Track Today","📈 Growth","🤖 AI Guru","❓ Ask Doubt"][i]}
             </div>
           ))}
         </div>
       </div>
 
+      {/* SELF */}
       <div style={dynamicCard}>
-        <h3 style={styles.cardTitle}>🔥 Self Growth</h3>
+        <h3 style={styles.cardTitle}>🔥 {TEXT.selfGrowth}</h3>
 
-        <div style={styles.grid}>
-          {["🧠 Focus Training", "💪 Discipline", "📿 Sanskar", "⚖ Decision Help"].map((item, i) => (
+        <div style={styles.grid(screen)}>
+          {["🧠 Focus Training","💪 Discipline","📿 Values","⚖ Decision Help"].map((item, i) => (
             <div key={i} style={styles.card}>
               {item}
             </div>
@@ -139,14 +219,15 @@ export default function StudentHome() {
         </div>
       </div>
 
+      {/* PARENT */}
       <div style={{ marginTop: "20px", paddingBottom: "80px" }}>
         <button style={dynamicBtn} onClick={handleParentSwitch}>
-          Switch to Abhibhavak View
+          {TEXT.parentView}
         </button>
       </div>
 
-      <style>
-        {`
+      {/* ANIMATION */}
+      <style>{`
         @keyframes breathe {
           0% { transform: scale(1); }
           50% { transform: scale(1.02); }
@@ -162,35 +243,51 @@ export default function StudentHome() {
           50% { transform: translateX(2px); }
           100% { transform: translateX(0); }
         }
-        `}
-      </style>
+      `}</style>
 
     </div>
   );
 }
 
+// =========================
+// 🎨 STYLES
+// =========================
 const styles = {
-  container: {
+  container: (screen) => ({
     minHeight: "100vh",
     width: "100%",
-    maxWidth: "420px",
+    maxWidth: screen.container.maxWidth,
     margin: "0 auto",
-    padding: "16px"
-  },
+    padding: screen.container.padding
+  }),
+
   header: { marginBottom: "20px" },
-  title: {
+
+  title: (screen) => ({
+    fontSize: screen.font.title,
     background: "linear-gradient(135deg, #FF8C42, #FFD166)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent"
-  },
-  sub: { fontSize: "13px", color: "#A1A1A6" },
-  cardTitle: { color: "#fff" },
-  cardSub: { fontSize: "13px", color: "#ccc" },
-  grid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" },
+  }),
+
+  sub: (screen) => ({
+    fontSize: screen.font.text
+  }),
+
+  cardTitle: { color: "#333" },
+  cardSub: { fontSize: "13px", color: "#444" },
+
+  grid: (screen) => ({
+    display: "grid",
+    gridTemplateColumns: screen.grid.columns,
+    gap: "12px"
+  }),
+
   card: {
-    background: "rgba(255,255,255,0.08)",
-    padding: "14px",
-    borderRadius: "14px",
-    textAlign: "center"
+    background: "rgba(255,255,255,0.85)",
+    padding: "16px",
+    borderRadius: "16px",
+    textAlign: "center",
+    cursor: "pointer"
   }
 };
