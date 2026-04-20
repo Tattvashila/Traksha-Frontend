@@ -40,7 +40,6 @@ export default function LoginScreen() {
         body: JSON.stringify({ userId: finalId, password })
       });
 
-      // 🔥 SAFE JSON PARSE (CRASH FIX)
       const text = await res.text();
       let data;
 
@@ -56,13 +55,11 @@ export default function LoginScreen() {
         return;
       }
 
-      // 🔐 OTP FLOW
       if (data.status === "OTP_REQUIRED") {
         navigate("/otp", { state: { userId: finalId } });
         return;
       }
 
-      // ✅ SUCCESS
       setCurrentUser({ id: finalId });
       navigate("/dashboard");
 
@@ -76,14 +73,18 @@ export default function LoginScreen() {
 
   return (
     <div style={{ ...styles.container, background: theme.background }}>
+
       <div style={styles.card}>
 
         <img src={logo} alt="traksha" style={styles.logo} />
 
         <h2 style={styles.title}>Traksha</h2>
+
         <p style={styles.subtitle}>{TEXT.loginSubtitle}</p>
 
-        <p style={styles.demo}>Use any TRK ID + password 1234</p>
+        <p style={styles.tagline}>
+          प्रवेश करें एक ऐसे संसार में जहाँ अनुशासन ही स्वतंत्रता है
+        </p>
 
         <form onSubmit={handleLogin} style={styles.form}>
 
@@ -104,6 +105,7 @@ export default function LoginScreen() {
 
           {error && <p style={styles.error}>{error}</p>}
 
+          {/* 🔥 LOGIN BUTTON */}
           <button
             type="submit"
             style={{
@@ -115,6 +117,14 @@ export default function LoginScreen() {
           >
             {loading ? "Please wait..." : "Continue"}
           </button>
+
+          {/* 🔥 SIGNUP LINK */}
+          <p
+            style={styles.signup}
+            onClick={() => navigate("/signup")}
+          >
+            New here? Create Account
+          </p>
 
         </form>
 
@@ -129,46 +139,84 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    padding: "16px"
+    padding: "clamp(12px, 4vw, 40px)",
+    background: `
+      radial-gradient(circle at top, #FFF3E0, #FFE0B2, #FFD180)
+    `
   },
+
   card: {
     width: "100%",
-    maxWidth: "360px",
-    background: "rgba(255,255,255,0.05)",
-    padding: "26px",
-    borderRadius: "20px",
+    maxWidth: "420px",
+    padding: "clamp(20px, 4vw, 32px)",
+    borderRadius: "24px",
     textAlign: "center",
-    backdropFilter: "blur(16px)",
-    border: "1px solid rgba(255,140,66,0.2)"
+    background: "rgba(255,255,255,0.65)",
+    backdropFilter: "blur(20px)",
+    border: "1px solid rgba(255,140,66,0.3)",
+    boxShadow: "0 20px 40px rgba(255,140,66,0.2)"
   },
+
   logo: {
-    width: "60px",
-    marginBottom: "10px",
-    filter: "drop-shadow(0 0 8px rgba(255,140,66,0.5))" // 🔥 LOGO FIX
+    width: "clamp(50px, 12vw, 70px)",
+    marginBottom: "12px",
+    filter: "drop-shadow(0 0 12px rgba(255,140,66,0.5))"
   },
+
   title: {
+    fontSize: "clamp(22px, 5vw, 28px)",
+    marginBottom: "4px",
     background: "linear-gradient(135deg, #FF8C42, #FFD166)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent"
   },
-  subtitle: { color: "#aaa", fontSize: "12px" },
-  demo: { fontSize: "11px", color: "#FFD166" },
-  form: { display: "flex", flexDirection: "column", gap: "12px" },
+
+  subtitle: {
+    color: "#555",
+    fontSize: "clamp(12px, 2.5vw, 14px)"
+  },
+
+  tagline: {
+    fontSize: "12px",
+    color: "#a66b00",
+    marginBottom: "10px"
+  },
+
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "14px",
+    marginTop: "10px"
+  },
+
   input: {
-    padding: "12px",
-    borderRadius: "12px",
-    border: "1px solid rgba(255,255,255,0.1)",
-    background: "rgba(255,255,255,0.06)",
-    color: "#fff",
+    padding: "14px",
+    fontSize: "clamp(14px, 2.5vw, 16px)",
+    borderRadius: "14px",
+    border: "1px solid rgba(255,140,66,0.3)",
+    background: "rgba(255,255,255,0.9)",
     outline: "none"
   },
+
   button: {
-    padding: "14px",
-    borderRadius: "12px",
+    padding: "clamp(12px, 3vw, 16px)",
+    borderRadius: "14px",
     border: "none",
     background: "linear-gradient(135deg, #FF8C42, #FFD166)",
     fontWeight: "bold",
     cursor: "pointer"
   },
-  error: { color: "#ff4d4d", fontSize: "12px" }
+
+  signup: {
+    marginTop: "12px",
+    textAlign: "center",
+    fontSize: "13px",
+    color: "#888",
+    cursor: "pointer"
+  },
+
+  error: {
+    color: "#d32f2f",
+    fontSize: "12px"
+  }
 };
