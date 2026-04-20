@@ -2,7 +2,7 @@
 // 🧠 TRAKSHA INSIGHT ENGINE (PASSIVE AI)
 // =========================
 
-import { getUserState, getUserScore } from "../../modules/tattvapeetha/TeacherDashboard";
+import { getUserState, getUserScore } from "../../modules/tattvapeetha/TrackerStore";
 
 // =========================
 // 🔍 GENERATE INSIGHT
